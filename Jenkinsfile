@@ -1,35 +1,30 @@
 pipeline {
     agent any
-
     tools {
         maven 'Maven'
     }
-
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/HackStyx/ansible-app.git'
+                git 'https://github.com/HackStyx/Maven-Web-App.git'
             }
         }
-
         stage('Build') {
             steps {
-                sh 'mvn clean install'
+                sh 'mvn clean package'
+                sh 'chmod 644 target/mvn_web_app.war'
             }
         }
-
         stage('Archive') {
             steps {
                 archiveArtifacts artifacts: 'target/*.war', fingerprint: true
             }
         }
-
         stage('Deploy') {
             steps {
-                ansiblePlaybook(
-                    playbook: 'ansible/deploy.yml',
-                    inventory: 'ansible/hosts.ini'
-                )
+                  sh 'mvn clean package'
+               ansiblePlaybook playbook: 'ansible/deploy.yml', inventory: 'ansible/hosts.ini'
+          
             }
         }
     }
